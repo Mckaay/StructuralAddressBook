@@ -11,6 +11,7 @@ using namespace std;
 
 struct Person
 {
+    int userID;
     int ID;
     string name;
     string surname;
@@ -18,6 +19,167 @@ struct Person
     string emailAdress;
     string adress;
 };
+
+struct User
+{
+    int ID;
+    string login;
+    string password;
+};
+
+void displayLoginMenu()
+{
+    cout << "1. Rejestracja " << endl;
+    cout << "2. Logowanie " << endl;
+    cout << "9. Wyjdz z programu " << endl;
+    cout << "--------------------" << endl;
+    cout << "Twoj wybor: ";
+}
+
+void saveUsersToTextFile(vector<User> users)
+{
+    fstream textFile;
+    textFile.open("Uzytkownicy.txt",fstream::out);
+
+    for(auto it1 = users.begin(); it1 != users.end(); it1++ )
+    {
+        textFile << it1->ID <<"|"<< it1->login <<"|"<< it1->password << "|" << endl;
+    }
+    textFile.close();
+}
+
+bool checkIfUserAlreadyExists(vector <User> &users,string checkedUserLogin)
+{
+    for(auto it1 = users.begin(); it1 != users.end() ; it1++ )
+    {
+        if(it1->login == checkedUserLogin) return true;
+    }
+    return false;
+}
+
+void registration(vector <User> &users)
+{
+    User user;
+    if(users.empty()) user.ID = 1;
+    else user.ID =  users.back().ID +1;
+
+    string login;
+    string password;
+
+    cout << "Podaj nazwe uzytkownika: ";
+    cin >> login;
+
+    while(checkIfUserAlreadyExists(users, login))
+    {
+        cout << "Nazwa uzytkownika jest juz zajeta" << endl;
+        cout << "Sprobuj jeszcze raz" << endl;
+        cin >> login;
+    }
+    cout << "Podaj haslo: ";
+    cin >> password;
+
+    user.login = login;
+    user.password = password;
+    users.push_back(user);
+
+    saveUsersToTextFile(users);
+    cout << "Pomyslnie zarejestrowano uzytkownika!" << endl;
+}
+
+int checkIfCorrectPassword(vector<User> users, string login, string password)
+{
+    for(auto it1 = users.begin() ; it1 != users.end(); it1++)
+    {
+        if(it1->login == login)
+        {
+            if(it1->password == password) return it1->ID;
+            else return 0;
+        }
+    }
+    return 0;
+}
+
+void changePassword(vector<User> &users,int ID)
+{
+    string newPassword;
+
+    cout << "Podaj nowe haslo: ";
+    cin >> newPassword;
+
+    for(auto it1 = users.begin(); it1 != users.end(); it1++ )
+    {
+        if (it1 -> ID == ID)
+        {
+            it1 -> password = newPassword;
+            cout << "Haslo zostalo zmienione pomyslnie." << endl;
+        }
+    }
+    saveUsersToTextFile(users);
+}
+
+void loadUserDataFromTextFileToVector(vector<User> &users)
+{
+    fstream textFile;
+    textFile.open("Uzytkownicy.txt",fstream::in | fstream::out | fstream::app);
+
+    string textFileLine;
+    int startPosition;
+
+    while(getline(textFile,textFileLine))
+    {
+        User user;
+        startPosition = 0;
+        user.ID = stoi(textFileLine.substr(startPosition,textFileLine.find("|",startPosition) - startPosition));
+
+        startPosition = textFileLine.find("|",startPosition)+1;
+        user.login = textFileLine.substr(startPosition,textFileLine.find("|",startPosition) - startPosition);
+
+        startPosition = textFileLine.find("|",startPosition)+1;
+        user.password = textFileLine.substr(startPosition,textFileLine.find("|",startPosition) - startPosition);
+
+        users.push_back(user);
+    }
+}
+
+int loggingIn(vector<User> users)
+{
+    string login;
+    string password;
+
+    cout << "Podaj login: ";
+    cin >> login;
+
+    int number;
+
+    if(checkIfUserAlreadyExists(users,login))
+    {
+        for(int i = 0 ; i < 3 ; i++)
+        {
+            cout << "Podaj haslo: ";
+            cin >> password;
+            number = checkIfCorrectPassword(users,login,password);
+            if(number)
+            {
+                cout << "Pomyslnie zalogowano." << endl;
+                return number;
+            }
+            else
+            {
+                cout << "Zle haslo. Pozostalo ci " << 2 - i << " proby. " << endl;
+            }
+        }
+    }
+    else
+    {
+        cout << "Nie ma takiego uzytkownika!" << endl;
+        return 0;
+    }
+    return 0;
+}
+
+
+
+
 
 string changeFirstLetterToUpperCaseRestToLowerCase(string word)
 {
