@@ -347,6 +347,7 @@ int personCounter(vector<Person> adressBook)
 
 void printPersonData(Person person)
 {
+    cout << "ID Adreata:      " << person.ID << endl;
     cout << "Imie:            " << person.name << endl;
     cout << "Nazwisko:        " << person.surname << endl;
     cout << "Numer telefonu:  " << person.phoneNumber << endl;
